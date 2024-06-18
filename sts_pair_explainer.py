@@ -81,19 +81,22 @@ class ExplainableSTS():
         return self.wrapper.sts_model([(s1, s2)])[0]
 
     def explain(self, sent1, sent2, plot=False):
-        explainer = shap.Explainer(self.wrapper, self.wrapper.mask_model)
-        value = explainer(self.wrapper.build_feature(sent1, sent2))
-        if plot: shap.waterfall_plot(value[0])
-        all_tokens = [] 
-        all_tokens += ['s1_'+t for t in self.wrapper.tokenizer(sent1)] 
-        all_tokens += ['s2_'+t for t in self.wrapper.tokenizer(sent2)] 
+        feature_data = self.wrapper.build_feature(sent1, sent2)
+        num_features = feature_data.shape[1]  # Calculate the number of features
+        min_evals = 2 * num_features + 1  # Minimum required evaluations
 
-        return [(token,sv) for token, sv in zip(all_tokens,value[0].values)]
+        # Create the SHAP PermutationExplainer with appropriate max_evals
+        explainer = shap.PermutationExplainer(self.wrapper, self.wrapper.mask_model)
+        value = explainer(feature_data, max_evals=min_evals)
 
+        if plot:
+            shap.waterfall_plot(value[0])
 
+        all_tokens = []
+        all_tokens += ['s1_' + t for t in self.wrapper.tokenizer(sent1)]
+        all_tokens += ['s2_' + t for t in self.wrapper.tokenizer(sent2)]
 
-
-
+        return [(token, sv) for token, sv in zip(all_tokens, value[0].values)]
 
 
 
