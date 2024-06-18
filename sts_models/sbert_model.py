@@ -2,7 +2,7 @@ from sentence_transformers import SentenceTransformer, util
 import numpy as np
 
 class SBertModel():
-    def __init__(self, wanted_model='Salesforce/SFR-Embedding-Mistral'):
+    def __init__(self, wanted_model='mixedbread-ai/mxbai-embed-large-v1'):
         self.sts_model = SentenceTransformer(wanted_model)
 
     def __call__(self, sent_pairs):
